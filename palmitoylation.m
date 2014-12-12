@@ -1,20 +1,23 @@
 function [ ] = palmitoylation( m, n )
 % m: number of aa residues upstream, m <= 15
 % n: number of aa residues downstream n <= 15
+query_ratio = 0.01;
+start_with_num_of_data = 1;
 
 m = uint8(m);
 n = uint8(n);
 
-fileID = fopen('sm_palmitoylation_site_peptide.txt');
+%fileID = fopen('sm_palmitoylation_site_peptide.txt');
+fileID = fopen('All_palmitoylation_site_peptide.txt');
 C = textscan(fileID,'%d\t%s\t%d');
 fclose(fileID);
 
 [pid, seq, label] = C{1,:};
 
 seq = cell2mat(seq);
-seq = seq(:, 15-m+1:15+n+1)
+seq = seq(:, 15-m+1:15+n+1);
 
-get_diff(seq(1,:), seq)
+[row_num, col_num] = size(seq);
 
 para_mass = read_linear('Mass.txt');
 para_hydropathy_index = read_linear('Hydropathy_index.txt');
@@ -28,8 +31,46 @@ para_BLOSUM = read_matrix('ScoreMatrixBLOSUM62.txt');
 
 paras = [para_mass, para_hydropathy_index, para_PI, para_PK1, para_PK2, para_Polar, para_vdw_volume, para_BLOSUM];
 
-Xs = GetFeatureMatrix(seq, labels, paras);
+random_list = randperm(row_num);
+%Initialize the first learner with random pick data
+known_data = seq(random_list(1:start_with_num_of_data), :);
+known_label = label(random_list(1:start_with_num_of_data), :);
 
+Xs = GetFeatureMatrix(known_data, known_label, paras);
+
+seq(random_list(1:start_with_num_of_data),:) = [];
+label(random_list(1:start_with_num_of_data),:) = [];
+
+i = 0;
+times = row_num * query_ratio - start_with_num_of_data;
+while i < 1
+    learner = TreeBagger(20, Xs, known_label);
+    
+    test_Xs = GetTestFeatureMatrix(seq, known_data, known_label, paras);
+    
+    [pp, diffs] = predict(learner, test_Xs);
+    [~, sortedIndex]= sort(diffs, 'descend');
+    
+    query_index = sortedIndex(1);
+    known_data = [known_data; seq(query_index, :)];
+    known_label = [known_label; label(query_index, :)];
+    Xs = GetFeatureMatrix(known_data, known_label, paras);
+    
+    seq(query_index, :) = [];
+    label(query_index, :) = [];
+    
+    i = i + 1;
+end
+
+get_accuracy(learner, seq, known_data, known_label, label, paras)
 
 end
 
+function accuracy = get_accuracy(learner, seq, known_data, known_label, label, paras)
+    [y_predicted, ~] = predict(learner, GetTestFeatureMatrix(seq, known_data, known_label, paras));
+    
+    yp = str2num(char(y_predicted));
+    sames = yp == label;
+    
+    accuracy = sum(sames) / length(label);
+end
