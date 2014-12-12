@@ -7,14 +7,13 @@ fileID = fopen(filename);
 
 head = fgets(fileID);
 head = strsplit(strtrim(head));
-head = cell2mat(head(1,2:end));
+head = cell2mat(head(1,2:end))
 
 
 for i = 1:size(head, 2)
-    value = fgets(fileID);
-    value = strsplit(strtrim(value));
-    value = str2double(value(1,2:end));
-    values(i,:) = value;
+    values = fgets(fileID);
+    values = strsplit(strtrim(values));
+    values = str2double(values(1,2:end))
 end
 
 fclose(fileID);
@@ -26,7 +25,7 @@ for i = 1:size(head, 2)
         ii = head(i) - 'A';
         jj = head(j) - 'A';
 
-        output(ii*27 + jj + 1) = values(i,j);
+        output(ii*27 + jj + 1) = abs(values(i) - values(j));
         
     end
 % end

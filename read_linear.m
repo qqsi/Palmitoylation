@@ -6,10 +6,12 @@ function [ output ] = read_linear( filename )
 fileID = fopen(filename);
 head = fgets(fileID);
 head = strsplit(strtrim(head));
-head = cell2mat(head)
+head = cell2mat(head);
 values = fgets(fileID);
 values = strsplit(strtrim(values));
-values = str2double(values)
+values = str2double(values);
+
+fclose(fileID);
 
 output = zeros(730,1);
 
@@ -25,7 +27,7 @@ end
 output;
 
 %values = double(size(values))
-fclose(fileID);
+
 
 
 end
