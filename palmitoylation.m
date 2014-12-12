@@ -11,8 +11,10 @@ fclose(fileID);
 
 [pid, seq, label] = C{1,:};
 
-seq = cell2mat(seq)
+seq = cell2mat(seq);
 seq = seq(:, 15-m+1:15+n+1)
+
+get_diff(seq(1,:), seq)
 
 para_mass = read_linear('Mass.txt');
 para_hydropathy_index = read_linear('Hydropathy_index.txt');
@@ -22,9 +24,9 @@ para_PK2 = read_linear('PK2.txt');
 para_Polar = read_linear('Polar.txt');
 para_vdw_volume = read_linear('van_der_Waals_volume.txt');
 
-para_BLOSUM = read_matrix('ScoreMatrixBLOSUM62.txt')
+para_BLOSUM = read_matrix('ScoreMatrixBLOSUM62.txt');
 
-paras = [para_mass, para_hydropathy_index, para_PI, para_PK1, para_PK2, para_Polar, para_vdw_volume, para_BLOSUM]
+paras = [para_mass, para_hydropathy_index, para_PI, para_PK1, para_PK2, para_Polar, para_vdw_volume, para_BLOSUM];
 
 
 end
