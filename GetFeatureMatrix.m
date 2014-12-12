@@ -16,6 +16,6 @@ function matrix = GetFeatureMatrix(seq, labels, paras)
         neg = get_diff(cur, neg_data) * paras;
         
         matrix(i, :) = [pos neg];
-    end    
+    end
 end
 

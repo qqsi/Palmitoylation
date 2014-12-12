@@ -28,6 +28,8 @@ para_BLOSUM = read_matrix('ScoreMatrixBLOSUM62.txt');
 
 paras = [para_mass, para_hydropathy_index, para_PI, para_PK1, para_PK2, para_Polar, para_vdw_volume, para_BLOSUM];
 
+Xs = GetFeatureMatrix(seq, labels, paras);
+
 
 end
 
